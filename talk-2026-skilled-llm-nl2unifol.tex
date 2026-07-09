@@ -1,58 +1,45 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[presentation]{beamer} %\mode<presentation>{\usetheme{sapere}}
+\documentclass[presentation]{beamer}
 \usepackage{talk-2026-skilled-llm-nl2unifol}
 
-	
 \title[From NL to unified FOL]{
-    % same title of the presented paper
     NL2UNIFOL: from Natural Language Sentences to\\
     Uniform First-Order Logic Formulae
 }
 \subtitle{}
-\author[MCKSM]{
-	\emph{Matteo Magnini}$^{*}$
-	\and 
-	Davide Liga$^{*}$
-	\and
-	Luca Pasetto$^{*}$
+\author[MLP]{
+    \emph{Matteo Magnini}$^{*}$
+    \and
+    Davide Liga$^{*}$
+    \and
+    Luca Pasetto$^{*}$
 }
-%
 \institute[UniLu, Uni*]{
-    $^{*}$University of Luxembourg, Luxembourg
-    \\
-    \texttt{
-        \{matteo.magnini, davide.liga, luca.pasetto\}@uni.lu
-    }
+    $^{*}$University of Luxembourg, Luxembourg\\
+    \texttt{\{matteo.magnini, davide.liga, luca.pasetto\}@uni.lu}
 }
-%
-\date[SKILLED-LLMs, 2026]{
-	Joint Workshop on Statistics and Knowledge Integration
-    \\
-    for Logic, Learning, Ethical Decisions, and LLMs (SKILLED-LLMs 2025)
-	\\
-	July 18th, 2026, Lisbon, Portugal
+\date[SKILLED-LLMs 2026]{
+    Joint Workshop on Statistics and Knowledge Integration\\
+    for Logic, Learning, Ethical Decisions, and LLMs (SKILLED-LLMs 2026)\\
+    July 18th, 2026, Lisbon, Portugal
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \AtBeginSection[]
 {
-%\\\\\\\\\\\\\\\\\\\\\
 \begin{frame}<beamer>[c,noframenumbering]
 \frametitle{Next in Line\ldots}
 \tableofcontents[sectionstyle=show/shaded,subsectionstyle=hide]
 \end{frame}
-%\\\\\\\\\\\\\\\\\\\\\
 }
 \AtBeginSubsection[]
 {
-%\\\\\\\\\\\\\\\\\\\\\
 \begin{frame}<beamer>[shrink,noframenumbering]
     \frametitle{Focus on\ldots}
-	\mbox{~}
-	\tableofcontents[currentsubsection,sectionstyle=shaded,subsectionstyle=show/shaded]
-	\mbox{~}
+    \mbox{~}
+    \tableofcontents[currentsubsection,sectionstyle=shaded,subsectionstyle=show/shaded]
+    \mbox{~}
 \end{frame}
-%\\\\\\\\\\\\\\\\\\\\\
 }
 
 \addbibresource{main.bib}
@@ -61,643 +48,553 @@
 \begin{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%\\\\\\\\\\\\\\\\\\\\\
+%===============================================================================
 \frame{\titlepage}
-%\\\\\\\\\\\\\\\\\\\\\
+%===============================================================================
 
-%\\\\\\\\\\\\\\\\\\\\\
+%===============================================================================
 \begin{frame}{Contribution}
 
-    \begin{block}{Main contributions of our work}
-        \begin{itemize}
-            %
-            \item Application of a neuro-symbolic model to the well known \alert{Pima Indians Diabetes dataset}\footnote{\url{https://www.kaggle.com/uciml/pima-indians-diabetes-database}}
-            %
-            \item \alert{Comparison} of the neuro-symbolic model with a purely connectionist approach and other ML models
-            %
-            \item \alert{Data degradation analysis} of the models with different kinds and intensity of noise
-        \end{itemize}
-    \end{block}
-    \vfill
-    \begin{figure}
-        \begin{minipage}{0.3\textwidth}
+\begin{block}{Main contributions of our work}
+    \begin{itemize}
+        \item Introduce \textbf{NL2UNIFOL}, a framework that turns NL sentences into a \alert{uniform} FOL theory
+        \item Propose a \textbf{symbol clustering} method that safely merges predicate and constant names
+        \item Combine \textbf{semantic} and \textbf{syntactic} similarity under logical constraints
+        \item Empirically study the quality of the merges on a \textbf{nutrition} subset of MALLS
+    \end{itemize}
+\end{block}
+
+\begin{figure}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \vspace{0.5cm}
+        \centering
+        \includegraphics[width=0.6\textwidth]{imgs/repo}
+        \caption{
             \centering
-            \includegraphics[width=0.6\textwidth]{figures/github-ltn}
-            \caption{
-                \centering
-                LTN implementation
-            }
-        \end{minipage}
-        \hspace{4.2cm}
-        \begin{minipage}{0.3\textwidth}
-            \centering
-            \includegraphics[width=0.6\textwidth]{figures/github-experiments}
-            \caption{
-                \centering
-                Experiments
-            }
-        \end{minipage}
-        \hfill
-        \label{fig:repo}
+            Repository
+        }
+    \end{minipage}
+    \begin{minipage}{0.6\textwidth}
+        \begin{block}{Goal}
+            Go beyond sentence-level NL$\rightarrow$FOL translation and obtain a theory-level, \alert{vocabulary-aligned} FOL representation that supports reasoning.
+        \end{block}
+    \end{minipage}
+    \label{fig:repo}
     \end{figure}
 
+\hspace{0.5cm}
 
 \end{frame}
-
-
-
-%\\\\\\\\\\\\\\\\\\\\\
 
 %===============================================================================
 \section[Background]{Motivation \& Context}
 %===============================================================================
 
-%%%%%%%%%%%%%%%%%%%%%%
 {
- \usebackgroundtemplate{}
- 
-%\\\\\\\\\\\\\\\\\\\\\
-\begin{frame}{Context: AI in Remote Healthcare}
+\usebackgroundtemplate{}
 
-In remote areas or regions with limited access to medical specialists high reliance on telemedicine and AI-based diagnostic tools
+%-------------------------------------------------------------------------------
+\begin{frame}{Motivation: Norms from Heterogeneous Stakeholders}
 
-\begin{block}{Potential risks}
-    \begin{itemize}
-        \item \alert{Misdiagnoses or inadequate care} 
-        \item \alert{Failure to adhere to medical protocols}
-    \end{itemize}
-    \vspace{-0.5em}
-\end{block}
-
-\begin{figure}
-    \includegraphics[width=0.65\textwidth]{imgs/MLProblems.png} 
- \end{figure} 
-    
-\centering{\alert{Still an open issue how to make them applicable to high-stakes or safety-critical application domains}}
-
-\end{frame}
-
-
-%\\\\\\\\\\\\\\\\\\\\\
-
-\begin{frame}{Machine Learning in Medicine}
-
-\begin{block}{Broad use of machine learning across different medical applications}
-
-FDA: Graphical representation of the annual trends in FDA~\cite{joshi2024fda}
-
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{imgs/FDA+papers.png} 
- \end{figure} 
- 
- Despite numerous studies employing ML in medical data analysis, only a fraction have impacted clinical care
- 
- \end{block}
-
-
- 
- \tiny{[3] G. Joshi, A. Jain, S. R. Araveeti, S. Adhikari, H. Garg, and M. Bhandari, “Fda-approved artificial intelligence and machine learning (ai/ml)-enabled medical devices: An updated landscape,” Electronics, vol. 13, no. 3, p. 498, 2024[\href{http://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}]}
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%knowledge integration perché dovrebbe aiutare
-
-\begin{frame}{Knowledge Integration into Data Driven Models}
-
-\begin{block}{Goals}
-    \begin{itemize}
-        \item \textbf{Improve generalisation} Injecting prior knowledge into the model can guide learning, making it more robust to data sparsity, noise or overfitting
-        \item \textbf{Reduce data dependency} Domain knowledge can help reduce the need for large labeled datasets, which are often expensive and time-consuming to gather
-        \item \textbf{Incorporate interpretability} Knowledge integration can improve the transparency of the model, making it easier to explain decisions and ensuring trustworthiness
-        \item \textbf{Enhance model efficiency} By constraining the learning process based on prior knowledge, models can converge faster and use fewer computational resources
-    \end{itemize}
-\end{block}
-
-\end{frame}
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Informed Machine Learning Pipeline} 
-
-{\centering{How prior knowledge can be integrated into the machine learning pipeline}}
-\vspace{1em}
-
-\begin{figure}
-    \includegraphics[width=0.95\textwidth]{imgs/integration-pipeline.png} 
-    \caption{Integration strategies~\cite{SirocchiBMC}  [\href{http://creativecommons.org/licenses/by/4.0/}{CC BY 4.0}]}
- \end{figure} 
- 
- \vspace*{3em}
-\tiny{[5] C. Sirocchi, A. Bogliolo, and S. Montagna, “Medical-informed machine learning: integrating prior knowledge into medical decision systems,” BMC Medical Informatics and Decision Making, vol. 24, no. 4, p. 186, 2024.}
- 
-\end{frame}
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Integration in Data Pre-Processing} 
-\begin{figure}
-    \includegraphics[width=0.9\textwidth]{imgs/integration-preprocessing.png} 
- \end{figure} 
- 
-\begin{block}{}
-\begin{enumerate}
- 	\item Data discretisation
- 	\item Missing data imputation
-	\item Data augmentation through simulation results
-\end{enumerate}
-\end{block}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Integration in Feature Engineering} 
-\begin{figure}
-    \includegraphics[width=0.9\textwidth]{imgs/integration-feateng.png} 
- \end{figure}  
- 
-\begin{block}{}
-\begin{enumerate}
- 	\item Derive additional features from existing ones using from the knowledge base
-	\begin{itemize} 
-		\item mathematical models 
-		\item logical inference 
-	\end{itemize}%. Combining several features into a few composite indices can reduce the dataset dimensionality while enhancing model accuracy and interpretability.
-	\item Feature selection
-\end{enumerate}
-\end{block}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Integration in Model Learning} 
-\begin{figure}
-    \includegraphics[width=0.9\textwidth]{imgs/integration-model-learning.png} 
- \end{figure} 
-  
-\begin{block}{}
-\begin{enumerate}
- 	\item Custom loss function: the  loss function that can be modified according to additional knowledge
- 	\item Architecture restructuring: knowledge can be integrated by choosing model structure and hyper-parameters
-\end{enumerate}
-\end{block}
-
-\end{frame}
-%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Integration in Output Evaluation} 
-\begin{figure}
-    \includegraphics[width=0.9\textwidth]{imgs/integration-output-eval.png} 
- \end{figure} 
-  
-\begin{block}{}
-
-The output of a learning pipeline can be combined or validated against existing knowledge:%. For example, predictions that do not agree with known constraints can be discarded or marked as suspicious so that results are consistent with prior knowledge.
-
-\begin{enumerate}
- 	\item Integration in series or in parallel
- 	\item Composite integration
-\end{enumerate}
-\end{block}
-
-\end{frame}
-
-%%%%%%%%
-
-\begin{frame}{Medical and Clinical Domain Knowledge Encoding}
-
-\begin{figure}
-    \includegraphics[width=0.9\textwidth]{imgs/knowledge_types.png} 
- \end{figure} 
- 
- \begin{block}{(d) Focus on rules}
- \begin{itemize}
-	\item Mirror clinical diagnostic reasoning and are often \alert{derived from standard clinical guidelines} or anatomical constraints 
-	\item Rule-based decision support systems $\rightarrow$ \lbl{symbolic AI}
-\end{itemize}
-\end{block}
-
-
-
- \end{frame}
-}
-%%%%%%%%%%%%%%%%%%%%%%
-\section[NeSy]{Neurosymbolic AI }
-%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%
-{
- \usebackgroundtemplate{}
- 
-%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Neurosymbolic AI: where Symbolic Artificial Intelligence is Integrated in  Machine Learning}
-
-
-\textbf{Neurosymbolic AI} refers to the integration of \textbf{Symbolic AI} with \textbf{Machine Learning (ML)} techniques, combining the strengths of both approaches
-
+\begin{block}{Sources of normative text}
 \begin{itemize}
-    \item \textbf{Integration}: Neurosymbolic AI combines the interpretability and reasoning power of \alert{symbolic methods} with the \alert{data-driven} learning of ML models
-    \item \textbf{Benefits}
-        \begin{itemize}
-            \item increase \alert{explainability} and \alert{trustability} of the system
-	        	\item build a system that is \\\alert{rubust} to data \\degradation
-        \end{itemize}
-  
+    \item Official regulations (e.g., GDPR, MiFID II), guidelines, institutional policies
+    \item Individual or group descriptions of moral values and principles
 \end{itemize}
-\vspace{-2.5em}
-\begin{figure}
-\hfill
-    \includegraphics[width=0.65\textwidth]{imgs/neurosymb.png}
- \end{figure} 
- 
-\end{frame}
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{The Framework of SKI}
-
-\begin{figure}
-    \includegraphics[width=0.95\textwidth]{imgs/SKI.png} 
- \end{figure} 
- \vfill
-\begin{block}{SKI definition~\cite{skeislr-acmcs}}
-Algorithms and procedures accepting symbolic knowledge as input and producing ML predictors as output \\
-\alert{Uneducated $\rightarrow$ Educated model}
 \end{block}
 
-\vspace{2em}
-\tiny{[2] G. Ciatto, F. Sabbatini, A. Agiollo, M. Magnini, and A. Omicini, “Symbolic knowledge extraction and injection with sub-symbolic predictors: A systematic literature review,” ACM Computing Surveys, vol. 56, no. 6, pp. 161:1–161:35, Jun. 2024.}
+\begin{block}{Vocabulary misalignment}
+\begin{itemize}
+    \item Different words for the same entity: \emph{customer} vs \emph{client}
+    \item Different phrasings for the same relation: \emph{is employed by} vs \emph{works for}
+    \item Typos, singular/plural, synonyms, hypernyms, paraphrases
+\end{itemize}
+\end{block}
 
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%
-
-%\begin{frame}{SKI: How Symbolic Knowledge can be Integrated in ML}
-%
-%\begin{block}{We define SKI as~\cite{skeislr-acmcs}}
-%
-%\begin{quote}
-%any algorithmic procedure affecting how sub-symbolic predictors draw their inferences in such a way that predictions are either computed as a function of, or made consistent with, some given symbolic knowledge.
-%\end{quote}
-%
-%\end{block}
-%
-%\begin{itemize}
-%
-%	\item SKI algorithms are procedures accepting symbolic knowledge as input and producing ML predictors as output.
-%	\item Knowledge should be symbolic and user provided ---hence, human interpretable
-%	\item Since any input knowledge should be algorithmically manipulated by the SKI procedure, we elicit an implicit requirement here, constraining the input knowledge to be machine interpretable as well
-%
-%\end{itemize}
-%\vspace{2em}
-%\tiny{[2] G. Ciatto, F. Sabbatini, A. Agiollo, M. Magnini, and A. Omicini, “Symbolic knowledge extraction and injection with sub-symbolic predictors: A systematic literature review,” ACM Computing Surveys, vol. 56, no. 6, pp. 161:1–161:35, Jun. 2024.}
-%
-%\end{frame}
-
-
-
-
-%\\\\\\\\\\\\\\\\\\\\\
-\begin{frame}{Contribution of the Paper in Details}
-
-\begin{block}{Explicitly state the contributions of the paper}
-    \begin{enumerate}
-  \item[RQ1] Is  SKI improving the \emph{performance} of  ML models?
-  %
-  In particular, recall and F1-score because of the medical domain's sensitivity to false negatives.
-  %
-  \item[RQ2] Is  SKI improving the \emph{adherence} of  ML models to established protocols?
-  %
-  Simply put, does the educated model make predictions more in line with the injected logic compared to the uneducated one?
-  %
-  \item[RQ3] Is  SKI improving the \emph{robustness} of  ML models in the presence of data degradation?
-  %
-  Does the performance of the educated predictor degrade less than that of the uneducated one when data are perturbed?
-  %
-%  \item[RQ4] Is  SKI} improving \emph{data efficiency}~(\cref{subsec:qos}) of  ML} models?
-%  %
-%  Equivalently, does the educated predictor achieve the same performance of the uneducated predictor with fewer data?
-  %
-\end{enumerate}
+\begin{block}{Consequence}
+\begin{itemize}
+    \item If every sentence is translated independently into FOL with its own vocabulary,
+          a reasoning engine cannot easily relate different norms and derive meaningful conclusions.
+\end{itemize}
 \end{block}
 
 \end{frame}
-%\\\\\\\\\\\\\\\\\\\\\
-}
+
+%-------------------------------------------------------------------------------
+\begin{frame}{Use Case: DJ4ME and Machine Ethics}
+
+\begin{block}{DJ4ME (Dialogue Jiminy)}
+\begin{itemize}
+    \item Architecture for machine ethics based on persuasion dialogues among stakeholders' avatars
+    \item Needs:
+    \begin{itemize}
+        \item \textbf{Norm mining} from NL corpora
+        \item Explanations of moral decisions in terms of extracted norms
+    \end{itemize}
+\end{itemize}
+\end{block}
+
+\begin{block}{Why uniform FOL matters here}
+\begin{itemize}
+    \item Norms must be represented in a \textbf{shared logical vocabulary}
+    \item Otherwise:
+    \begin{itemize}
+        \item stakeholders talk “past each other” at the symbolic level
+        \item reasoning and explanation across norms become fragile or impossible
+    \end{itemize}
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+%-------------------------------------------------------------------------------
+\begin{frame}{Limit of Existing NL$\rightarrow$FOL Approaches}
+
+\begin{block}{Recent progress}
+\begin{itemize}
+    \item LLM-based methods for NL$\rightarrow$FOL translation
+    \item Benchmarks (e.g., MALLS, FOLIO) and evaluation metrics
+    \item Strong results on \textbf{single-sentence} translation
+\end{itemize}
+\end{block}
+
+\begin{block}{Missing piece}
+\begin{itemize}
+    \item Existing works focus on isolated sentences
+    \item Predicate naming, constants, and variables are decided \textbf{locally}
+    \item No explicit mechanism for:
+    \begin{itemize}
+        \item symbol reuse
+        \item predicate alignment
+        \item theory-level coherence across a corpus
+    \end{itemize}
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+}\label{sec:motivation-&-context} % end background
+
 %===============================================================================
-\section[Methods]{Model \& Metrics}
+\section[Framework]{NL2UNIFOL Framework}
 %===============================================================================
-%%%%%%%%%%%%%%%%%%%%%%
-{
- \usebackgroundtemplate{}
- 
-\begin{frame}{Logic Tensor Networks}
-    Logic Tensor Networks (LTNs)~\cite{BadreddineGSS22} combine deep learning with symbolic reasoning, providing a framework for integrating logic and learning.
-    Using a differentiable form of first-order logic called \textbf{Real Logic}, LTNs can:
 
+{
+\usebackgroundtemplate{}
+
+%-------------------------------------------------------------------------------
+\begin{frame}{High-Level View of NL2UNIFOL}
+
+\begin{block}{Definition of “uniform”}
+All formulae in the theory share the same vocabulary, i.e., a common space of predicate and constant names.
+\end{block}
+
+\begin{block}{Pipeline}
+\begin{enumerate}
+    \item \textbf{Independent translation}:
+          use an LLM to translate each NL sentence into a preliminary FOL formula
+    \item \textbf{Symbol clustering}:
+          identify and safely merge predicate and constant names
+    \item \textbf{Reconciliation}:
+          replace original names with cluster representatives to obtain the final uniform theory
+\end{enumerate}
+\end{block}
+
+\end{frame}
+
+%-------------------------------------------------------------------------------
+\begin{frame}{Step 1: Independent NL$\rightarrow$FOL Translation}
+
+\begin{block}{Input}
+\begin{itemize}
+    \item NL sentences in the same domain (here: nutrition)
+\end{itemize}
+\end{block}
+
+\begin{block}{LLM-based translation}
+\begin{itemize}
+    \item Use instruction-tuned LLMs (e.g., Qwen 2.5, LLaMA 3, Mistral, Phi 3.1)
+    \item Prompt with:
     \begin{itemize}
-        \item Learn from data and incorporate prior knowledge.
-        \item Support logical reasoning during learning.
-        \item Represent complex relationships using tensor representations.
+        \item explicit FOL grammar and allowed operators
+        \item naming rules for predicates and variables
+        \item no functions, only predicates and (when needed) constants
+        \item few-shot examples (27 pairs from MALLS nutrition)
     \end{itemize}
+\end{itemize}
+\end{block}
 
-    \begin{figure}
-        \includegraphics[width=0.9\textwidth]{figures/framework_computational_graph}
-        \\
-        \caption*{Source: \url{https://github.com/logictensornetworks/logictensornetworks}}
-    \end{figure}
+\begin{block}{Output}
+\begin{itemize}
+    \item One syntactically-checked FOL formula per sentence
+    \item Still \textbf{non-uniform} symbol space
+\end{itemize}
+\end{block}
 
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{frame}{Metrics}
-    \begin{block}{Performance metrics}
+%-------------------------------------------------------------------------------
+\begin{frame}{Step 2: Symbol Collection with Logical Constraints}
+
+\begin{block}{Parsing}
+\begin{itemize}
+    \item Parse each preliminary formula with a CFG (implemented via Lark)
+    \item Extract:
     \begin{itemize}
-	\item Used to evaluate the predictive capabilities of the  ML models
-        \begin{itemize}
-            \item Accuracy, Precision, Recall, F1-Score\ldots
-        \end{itemize}
-        \item They are the same for both the educated and uneducated models
-         \end{itemize}
-    \end{block}
-    
-    \begin{block}{Logic adherence}
-       Metric to assess how well the model adheres to the clinical rules by comparing model predictions with logic formulas
-    \end{block}
-    
-     \begin{block}{QOS -- Robustness to Data Degradation}
-     \begin{itemize}
-            \item Input data noisy, incomplete, or biased
-            \item Data degradation may negatively affect the performance of a predictor, unless some  SKI procedure is in place to compensate for it
-            \item The robustness of a predictor can be estimated by applying perturbations to the training data and assessing performance on the perturbed data
-            \end{itemize}
-%            A robustness score can be computed as:
-%        
-%        \[
-%            \rho_{N, D}(\mathbf{D}) = \frac{1}{n} \sum_{\Delta D \in \mathbf{D}} \left\lVert \Delta D \right\rVert \cdot \frac{\pi(N_{\Delta D}, D \circ \Delta D)}{\pi(N, D)}
-%        \]
-    \end{block}
-    
+        \item predicate symbols as pairs $\langle N, A\rangle$ (name and arity)
+        \item constant names
+        \item number of occurrences and argument positions
+    \end{itemize}
+\end{itemize}
+\end{block}
+
+\begin{block}{Logical constraint}
+\begin{itemize}
+    \item Predicates with different arity \textbf{cannot} be merged
+    \item Argument positions will be used later to build context-based embeddings
+\end{itemize}
+\end{block}
+
 \end{frame}
 
+%-------------------------------------------------------------------------------
+\begin{frame}{Step 3: Context-Based Embeddings}
 
+\begin{block}{Key idea}
+Symbols should be represented not only by their surface form, but by \textbf{how they are used}
+in the preliminary theory.
+\end{block}
 
+\begin{block}{Predicate context}
+\begin{itemize}
+    \item For a predicate $N$ of arity $A$, collect all terms seen in each argument position
+    \item Verbalise into a short NL description of the form:\\
+    \emph{Predicate ‘N’ relates something like ‘T\_{1,1}, ..., T\_{1,n\_1}’ to ... ‘T\_{A,1}, ..., T\_{A,n\_A}’.}
+\end{itemize}
+\end{block}
 
+\begin{block}{Constant context}
+\begin{itemize}
+    \item For a constant $c$, collect predicates and argument positions in which it occurs
+    \item Verbalise as:\\
+    \emph{Constant ‘c’ is used as argument i of predicates ‘P\_1, ..., P\_m’, as argument j of predicates ‘P\_1, ..., P\_n’.}
+\end{itemize}
+\end{block}
 
-}\label{sec:theory-/-modelling-/-design}
-%\\\\\\\\\\\\\\\\\\\\\
+\begin{block}{Embeddings}
+\begin{itemize}
+    \item Feed these context strings into a transformer encoder (e.g., all-MiniLM-L6-v2)
+    \item Obtain dense, L2-normalised semantic vectors for each symbol
+\end{itemize}
+\end{block}
 
-\section[Case Study]{Case study: Experiments \& Results}
-%%%%%%%%%%%%%%%%%%%%%%
+\end{frame}
+
+%-------------------------------------------------------------------------------
+\begin{frame}{Step 4: Similarity Matrices}
+
+\begin{block}{Semantic and syntactic similarity}
+For predicates (similarly for constants):
+\begin{itemize}
+    \item Semantic: cosine similarity between embeddings
+          $\Rightarrow M_{p,\text{sem}}$
+    \item Syntactic: normalised Levenshtein distance between names
+          $\Rightarrow M_{p,\text{syn}}$
+\end{itemize}
+\end{block}
+
+\begin{block}{Arity mask}
+\begin{itemize}
+    \item Build $M_a$ where entries for pairs with different arity are set to zero
+\end{itemize}
+\end{block}
+
+\begin{block}{Final similarity}
+\[
+M_p = \big((1 - \alpha_p)\, M_{p,\text{sem}} + \alpha_p\, M_{p,\text{syn}}\big) \odot M_a
+\]
+\[
+M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
+\]
+\begin{itemize}
+    \item $\alpha_p, \alpha_c \in [0,1]$ control the weight of syntactic similarity
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+%-------------------------------------------------------------------------------
+\begin{frame}{Step 5–6: Graph Clustering and Reconciliation}
+
+\begin{block}{Graph construction}
+\begin{itemize}
+    \item Build graphs for predicates and constants:
+    \begin{itemize}
+        \item nodes: symbols
+        \item edges: similarity $> \tau_p$ (or $\tau_c$)
+    \end{itemize}
+    \item Connected components = clusters of symbols to be merged
+\end{itemize}
+\end{block}
+
+\begin{block}{Representative and reconciliation}
+\begin{itemize}
+    \item For each cluster, choose as representative the name with \textbf{most occurrences}
+    \item Replace all symbols in preliminary formulas with their cluster representative
+    \item Output: a \textbf{uniform} FOL theory
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+} % end framework
+
+%===============================================================================
+\section[Experiment]{Experimental Setup \& Results}
+%===============================================================================
+
 {
- \usebackgroundtemplate{}
- 
-%\\\\\\\\\\\\\\\\\\\\\
-\begin{frame}{Diabetes Risk Prediction}
+\usebackgroundtemplate{}
 
-\begin{block}{Knowledge base for predicting risk of type-2 diabetes as formalised in~\cite{kunapuli2010online}.}
-\begin{table}[!h]
+%-------------------------------------------------------------------------------
+\begin{frame}{Dataset and NL$\rightarrow$FOL Baseline}
 
-\label{tab:rules}
-%\raggedright
-%\renewcommand{\arraystretch}{1.5}
-\begin{tabular}{|lll|}
-\hline
-Rule 1 & & $(BMI \geq 30) \land (G_{120} \geq 126) \implies \text{diabetes}$ \\
-Rule 2 & & $(BMI \leq 25) \land (G_{120} \leq 100) \implies \text{healthy}$ \\
-\hline
-\end{tabular}
-\end{table}
-\end{block}
-
-The dataset comprises 768 medical profiles of women aged $\geq$ 21. \\ The target variable is binary, indicating a diabetes diagnosis within five years. 
-
-
-\begin{block}{Pima Indians Diabetes dataset}
-\begin{table}[h]
-\scriptsize{
-\begin{tabular}{@{}lcl@{}}
-\toprule
-Feature name & Code & Description\\ 
-\midrule
-Pregnancies & & Number of times pregnant\\
-Glucose & $G_{120}$ & 2-hour plasma glucose concentration \\
-Blood Pressure & $BP$ & Diastolic blood pressure\\
-Skin Thickness & $ST$ & Triceps skin-fold thickness\\
-Insulin & $I_{120}$ & 2-hour serum insulin \\
-Body mass index & $BMI$ & Body mass index as weight/(height)$^2$ \\
-Diabetes Pedigree Function & $DPF$ & Likelihood function of diabetes \\
-	 &  &  based on family history~\cite{smith1988using}\\
-Age & & Age in years\\
-\midrule
-\end{tabular}
-}
-
-\label{tab:pima}%
-\end{table}
-\end{block}
-
-\end{frame}
-
-
-%\\\\\\\\\\\\\\\\\\\\\
-\begin{frame}{Trained Models and Hyperparameters}
-
-\begin{block}{Reference models' hyperparameters}
-%
-\begin{description}
-  \item[KNN] with $k=7$ and $L1$ distance;
-  \item[DT] with entropy as split criterion and maximum depth of 10;
-  \item[RF] with 50 trees, maximum depth of 20, entropy as criterion, and minimum number of samples per leaf of 5;
-  \item[LR] with a regularisation parameter of 10, a maximum number of iterations of 1000 and liblinear as the solver.
-\end{description}
-\end{block}
-
-
-\begin{block}{MLP (uneducated) and LTN (educated)}
-Feedforward NN with the following architecture:
-%
+\begin{block}{MALLS dataset}
 \begin{itemize}
-  \item Input layer with 8 neurones, one for each feature in the dataset, LeakyReLU as activation function and batch normalisation;
-  \item First, second and third hidden layer with respectively 256, 128, and 64 neurones, using LeakyReLU and batch normalisation;
-  \item Output layer with 1 neurone and sigmoid function.
+    \item NL–FOL pairs from multiple domains
+    \item We focus on a \textbf{nutrition} subset (food recommendation)
+    \item 748 pairs for evaluation, 27 for few-shot prompting
+\end{itemize}
+\end{block}
+
+\begin{block}{Models evaluated}
+\begin{itemize}
+    \item Qwen 2.5 Instruct (7B)
+    \item LLaMA 3 Instruct (8B)
+    \item Mistral 7B Instruct
+    \item Phi 3.1 Instruct (7B)
+\end{itemize}
+\end{block}
+
+\begin{block}{Syntactic correctness}
+\begin{itemize}
+    \item Metric: percentage of generated formulas that are valid under our CFG
+    \item Few-shot prompting improves all models
+    \item Qwen 2.5 Instruct (few-shot) gives the best syntactic correctness
+          $\Rightarrow$ used as base for clustering experiments
 \end{itemize}
 \end{block}
 
 \end{frame}
 
+%-------------------------------------------------------------------------------
+\begin{frame}{Hyperparameter Selection for Predicate Clustering}
 
-%\\\\\\\\\\\\\\\\\\\\\
-\begin{frame}
-
-\begin{block}{\textbf{RQ1} -- Is SKI improving the \emph{performance}?}
-\begin{table}[]
-\centering
-\begin{adjustbox}{max width=\textwidth}
-\begin{tabular}{|l|c|c|c|c|c|c|}
-\hline
-\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} & \textbf{Balanced Accuracy} & \textbf{MCC} \\
-\hline
-KNN                  & 0.738 $\pm$  0.02 & 0.636 $\pm$  0.03 & 0.583 $\pm$  0.05 & 0.607 $\pm$  0.03 & 0.702 $\pm$  0.02 & 0.413 $\pm$  0.05 \\
-\hline
-Decision Tree        & 0.697 $\pm$  0.02 & 0.565 $\pm$  0.03 & 0.580 $\pm$  0.05 & 0.571 $\pm$  0.03 & 0.670 $\pm$  0.02 & 0.339 $\pm$  0.05 \\
-\hline
-Random Forest        & 0.758 $\pm$  0.02 & 0.677 $\pm$  0.03 & 0.592 $\pm$  0.05 & 0.630 $\pm$  0.03 & 0.720 $\pm$  0.02 & 0.456 $\pm$  0.04 \\
-\hline
-Logistic Regression  & \textbf{0.763 $\pm$  0.02 }& \textbf{0.702 $\pm$  0.04} & 0.560 $\pm$  0.04 & 0.622 $\pm$  0.03 & 0.716 $\pm$  0.02 & 0.460 $\pm$  0.04 \\
-\hline
-MLP                  & 0.754 $\pm$  0.02 & 0.644 $\pm$  0.03 & 0.665 $\pm$  0.05 & 0.653 $\pm$  0.03 & 0.733 $\pm$  0.02 & 0.464 $\pm$  0.04 \\
-\hline
-Logic Tensor Network & 0.747 $\pm$  0.02 & 0.620 $\pm$  0.03 & \textbf{0.725 $\pm$  0.05} & \textbf{0.666 $\pm$  0.02} & \textbf{0.742 $\pm$  0.02} & \textbf{0.471 $\pm$  0.03} \\
-\hline
-\end{tabular}
-\end{adjustbox}
-\vspace{0.5em}
-\caption{
-  Performance Metrics (Mean $\pm$  Std) for Models.
-  %
-  The best scores are highlighted in bold.
-  %
-  According to the Wilcoxon signed-rank test with p-value=0.05, the LTN model outperforms all other models in terms of Recall, F1 Score, and Balanced Accuracy.
-}
-\label{tab:performance}
-\end{table}
+\begin{block}{Hyperparameters}
+\begin{itemize}
+    \item $\alpha_p$: trade-off between semantic vs syntactic similarity
+    \item $\tau_p$: similarity threshold for creating edges in the predicate graph
+\end{itemize}
 \end{block}
 
-\begin{block}{\textbf{RQ2} -- Is SKI improving the \emph{adherence}?}
-\begin{table}[]
-  \centering
-  {\fontsize{8}{12}\selectfont
-  \begin{adjustbox}{max width=\textwidth}
-    \begin{tabular}{|l|c|c|}
-      \hline
-      \textbf{Model} & \textbf{Rule 1} & \textbf{Rule 2} \\
-      \hline
-      KNN                   & 70.8 $\pm$  4.8   & 100.0 $\pm$  0.0 \\
-      \hline
-      Decision Tree         & 66.5 $\pm$  6.3   & 97.0 $\pm$  4.8 \\
-      \hline
-      Random Forest         & 76.6 $\pm$  5.1   & 100.0 $\pm$  0.0 \\
-      \hline
-      Logistic Regression   & 75.0 $\pm$  4.2   & 100.0 $\pm$  0.0 \\
-      \hline
-      MLP                  & 82.0 $\pm$  5.8   & 100.0 $\pm$  0.0 \\
-      \hline
-      Logic Tensor Network  & \textbf{87.4 $\pm$  5.2 }  & 100.0 $\pm$  0.0 \\
-      \hline
-    \end{tabular}
-  \end{adjustbox}}
-  \vspace{0.5em}
-  \caption{Logic Adherence: Results for Rule 1 and Rule 2 (Mean $\pm$  Std) across Various Models}\label{tab:logic}
+\begin{block}{Grid search}
+\begin{itemize}
+    \item $\alpha_p \in \{0.0, 0.1, \dots, 1.0\}$
+    \item $\tau_p \in \{0.525, 0.55, \dots, 1.0\}$
+\end{itemize}
+\end{block}
 
-\end{table}
-
+\begin{block}{Selection criterion}
+\begin{itemize}
+    \item Want many non-trivial clusters \textbf{without} over-merging everything
+    \item Define a score $S(\alpha_p, \tau_p)$ that:
+    \begin{itemize}
+        \item rewards the number of non-trivial clusters
+        \item penalises excessive merges
+        \item prefers stable optima (no sharp peaks)
+    \end{itemize}
+\end{itemize}
 \end{block}
 
 \end{frame}
 
-%\\\\\\\\\\\\\\\\\\\\\
+%-------------------------------------------------------------------------------
+\begin{frame}{Predicate Clustering: Quantitative Results}
 
-\begin{frame}{}
-\begin{block}{\textbf{RQ3} -- Is SKI improving the \emph{robustness}?}
-\begin{figure}
-\begin{center}
-	 \includegraphics[width=0.75\textwidth]{imgs/improved_robustness_plot}
-\caption{Model robustness under three common clinical data perturbations: noise injection from faulty devices, data loss from missing records, and label flipping due to incorrect diagnoses.}
-\label{fig:robustness}
-\end{center}
-\end{figure}
+\begin{block}{Best configuration}
+\begin{itemize}
+    \item $\alpha_p^\star = 0.1$ (mostly semantic, slightly syntactic)
+    \item $\tau_p^\star = 0.9$ (conservative threshold)
+\end{itemize}
 \end{block}
+
+\begin{block}{Vocabulary reduction}
+\begin{itemize}
+    \item 1170 unique predicates in the generated formulas
+    \item After merging: 863 unique predicates
+    \item $\Rightarrow$ about \textbf{26.2\%} reduction
+\end{itemize}
+\end{block}
+
+\begin{block}{Clusters}
+\begin{itemize}
+    \item 307 predicates are merged into 140 non-trivial clusters
+    \item Remaining predicates are singletons (not merged)
+\end{itemize}
+\end{block}
+
 \end{frame}
 
-%\\\\\\\\\\\\\\\\\\\\\
-}
-\section[Discussion]{Conclusions \& Future Works}
+%-------------------------------------------------------------------------------
+\begin{frame}{Error Taxonomy for Predicate Merges}
+
+\begin{block}{Relation-level taxonomy}
+Each mapping (\emph{predicate} $\rightarrow$ \emph{representative}) is classified as:
+\begin{itemize}
+    \item \textbf{OK}: valid mapping, representative is a good semantic generalisation
+    \item \textbf{Egen}: over-generalisation (too abstract)
+    \item \textbf{Espe}: over-specification (too specific)
+    \item \textbf{Ecomp}: compositional reduction (only part of the meaning is preserved)
+    \item \textbf{Esem}: semantic mismatch (different concepts)
+    \item \textbf{Epol}: polarity inversion (opposite meaning)
+    \item \textbf{Ecat}: ontological shift (different ontological type)
+    \item \textbf{Ehall}: unsupported generalisation (spurious abstraction)
+\end{itemize}
+\end{block}
+
+\begin{block}{Annotation}
+\begin{itemize}
+    \item Three human annotators + majority voting with severity-based tie-breaking
+    \item Also compare with automatic annotation from ChatGPT
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+%-------------------------------------------------------------------------------
+\begin{frame}{Error Distribution: How Good Are the Merges?}
+
+\begin{block}{Overall picture (majority vote)}
+\begin{itemize}
+    \item Around \textbf{46\%} of mappings are \textbf{OK}
+    \item Most common error: \textbf{over-generalisation} (Egen)
+    \item Many errors are relatively mild:
+    \begin{itemize}
+        \item Egen, Espe, Ecomp, Ehall can be acceptable depending on the required level of abstraction
+    \end{itemize}
+    \item More severe errors:
+    \begin{itemize}
+        \item Esem, Ecat, Epol account for about a quarter of the mappings
+        \item Polarity inversions (Epol) are rare (around 1–2\%)
+    \end{itemize}
+\end{itemize}
+\end{block}
+
+\begin{block}{Takeaway}
+\begin{itemize}
+    \item NL2UNIFOL can achieve substantial vocabulary unification
+    \item But symbol clustering must be treated as a \textbf{noisy step},
+          with error types that depend on the application’s tolerance
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+} % end experiment
+
+%===============================================================================
+\section[Discussion]{Discussion \& Outlook}
+%===============================================================================
+
 {
- \usebackgroundtemplate{}
+\usebackgroundtemplate{}
 
-\begin{frame}
-\frametitle{Conclusions \& Future Works}
+%-------------------------------------------------------------------------------
+\begin{frame}{What NL2UNIFOL Provides}
 
-\begin{block}{Summing up}
+\begin{block}{Strengths}
 \begin{itemize}
-\item LTN outperforms classical ML models in \emph{recall}, as a clinically relevant metrics
-\item Injecting domain knowledge ensures \emph{adherence} to logic
-\item LTN is \emph{robust} to data perturbations, demonstrating strong resilience
+    \item End-to-end pipeline from NL sentences to a \textbf{uniform} FOL theory
+    \item Embedding-based symbol representations that use \textbf{logical context of use}
+    \item Combination of:
+    \begin{itemize}
+        \item semantic similarity
+        \item syntactic similarity
+        \item logical constraints (arity, occurrence-based representative)
+    \end{itemize}
 \end{itemize}
 \end{block}
 
-\begin{exampleblock}{Future works}
+\begin{block}{Limitations}
 \begin{itemize}
-\item Explore other SKI  methods and their computational complexity
-\item Investigate the potential of smaller, knowledge-injected models in improving explainability and efficiency of uneducated larger models
-\item Test over different datasets
+    \item Merging is imperfect: non-negligible portion of semantically problematic merges
+    \item Current evaluation is limited to one domain (nutrition) and relatively small models
+    \item Clustering is not yet integrated with downstream reasoning as a feedback signal
 \end{itemize}
-\end{exampleblock}
+\end{block}
 
 \end{frame}
 
+%-------------------------------------------------------------------------------
+\begin{frame}{Future Work}
 
+\begin{block}{Improving symbol clustering}
+\begin{itemize}
+    \item Integrate LLMs more tightly into the clustering step
+    \item Use logical reasoning (e.g., proof attempts, consistency checks) to veto bad merges
+    \item Explore alternative similarity functions and clustering algorithms
+\end{itemize}
+\end{block}
 
-%\\\\\\\\\\\\\\\\\\\\\
-%\begin{frame}%[allowframebreaks]
-%\frametitle{Conclusions \& future works}
-%
-%\begin{block}{Summing up}
-%    Summarise the most relevant contributions of this study:
-%    %
-%    \begin{itemize}
-%        \item conclusion 1
-%        \item conclusion 2
-%        \item conclusion 3
-%    \end{itemize}
-%\end{block}
-%
-%\begin{exampleblock}{Future works}
-%    Sketch some future research directions
-%    %
-%    \begin{itemize}
-%        \item future work 1
-%        \item future work 2
-%    \end{itemize}
-%\end{exampleblock}
-%
-%(may be split into 2 slides)
-%
-%\end{frame}
-%\\\\\\\\\\\\\\\\\\\\\
+\begin{block}{Broadening the scope}
+\begin{itemize}
+    \item Apply NL2UNIFOL to:
+    \begin{itemize}
+        \item legal corpora and regulatory text
+        \item medical guidelines and clinical protocols
+        \item richer ethical domains in DJ4ME
+    \end{itemize}
+    \item Extend to other logics (e.g., modal/deontic logics) for normative reasoning
+\end{itemize}
+\end{block}
 
+\end{frame}
+
+} % end discussion
+
+%===============================================================================
 \begin{frame}{Conclusions}
-\centering{\Large{Thank you!}}
+
+\begin{block}{In a nutshell}
+\begin{itemize}
+    \item We introduce NL2UNIFOL, targeting \textbf{uniform FOL theories} from NL corpora
+    \item The core is a context-aware symbol clustering mechanism combining semantic and syntactic information under logical constraints
+    \item Experiments on MALLS (nutrition domain) show:
+    \begin{itemize}
+        \item substantial vocabulary reduction
+        \item a mix of correct and noisy merges, with an explicit error taxonomy
+    \end{itemize}
+\end{itemize}
+\end{block}
+
 \vfill
-\begin{figure}
-    \includegraphics[width=1.0\textwidth]{imgs/conclusion.png} 
- \end{figure} 
+\centering\Large Thank you!\\
+\normalsize Questions?
 
 \end{frame}
-}
 
-%===============================================================================
-\section*{}
 %===============================================================================
 \frame{\titlepage}
+
 {
- \usebackgroundtemplate{}
-
+\usebackgroundtemplate{}
 \setbeamertemplate{page number in head/foot}{}
-%\\\\\\\\\\\\\\\\\\\\\
 \begin{frame}[t,allowframebreaks,noframenumbering]\frametitle{\refname}
-% \begin{frame}[c]\frametitle{\refname}
-	\AtNextBibliography{\scriptsize}
-	\setlength{\bibitemsep}{.5\baselineskip}
-	\printbibliography
-\end{frame}}
+    \AtNextBibliography{\scriptsize}
+    \setlength{\bibitemsep}{.5\baselineskip}
+    \printbibliography
+\end{frame}
+}
 
-\end{document}
+\end{document}la
