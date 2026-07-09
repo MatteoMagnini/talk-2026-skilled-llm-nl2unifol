@@ -5,7 +5,7 @@ on:
       - main
       - master
 env:
-  LATEX_ROOT: talk-2025-telmed-nesy
+  LATEX_ROOT: talk-2026-skilled-llm-nl2unifol
 jobs:
   compile:
     permissions: write-all
