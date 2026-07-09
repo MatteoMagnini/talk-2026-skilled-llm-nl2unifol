@@ -15,7 +15,14 @@
 
 %% Alma Logo
 \usebackgroundtemplate{%
-\tikz\node[opacity=0.1] {\vbox to \paperheight{\vfil\hbox to \paperwidth{\hfil\includegraphics[height=0.7\paperheight,width=0.8\paperwidth]{imgs/logo-ateneo}\hfil}\vfil}};}
+    \tikz[remember picture,overlay]{
+        \node[
+            anchor=south west,
+            opacity=1
+        ] at ([xshift=0.5cm,yshift=0.5cm]current page.south west)
+        {\includegraphics[width=1.5cm]{imgs/logo_unilu_fr}};
+    }%
+}
 
 
 
