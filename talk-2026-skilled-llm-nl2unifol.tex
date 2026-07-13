@@ -42,7 +42,7 @@
 \end{frame}
 }
 
-\addbibresource{main.bib}
+\addbibresource{talk-2026-skilled-llm-nl2unifol.bib}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
@@ -58,9 +58,9 @@
 \begin{block}{Main contributions of our work}
     \begin{itemize}
         \item Introduce \textbf{NL2UNIFOL}, a framework that turns NL sentences into a \alert{uniform} FOL theory
-        \item Propose a \textbf{symbol clustering} method that safely merges predicate and constant names
-        \item Combine \textbf{semantic} and \textbf{syntactic} similarity under logical constraints
-        \item Empirically study the quality of the merges on a \textbf{nutrition} subset of MALLS
+        \item Propose a \alert{symbol clustering} method that safely merges predicate and constant names
+        \item Combine \emph{semantic} and \emph{syntactic} similarity under logical constraints
+        \item Empirically study the quality of the merges on a \alert{nutrition} subset of \alert{MALLS}~\cite{DBLP:conf/acl/YangXPSF24}
     \end{itemize}
 \end{block}
 
@@ -97,6 +97,18 @@
 %-------------------------------------------------------------------------------
 \begin{frame}{Motivation: Norms from Heterogeneous Stakeholders}
 
+\begin{block}{Norms need to be \emph{machine-usable}}
+\begin{itemize}
+    \item Legal and ethical norms are mostly expressed in NL
+    \item For automated decision-making we need them in a \alert{logical formalism}:
+    \begin{itemize}
+        \item classical logical reasoners (e.g., first-order theorem provers)
+        \item argumentation frameworks and other AI reasoning systems
+    \end{itemize}
+    \item Manual formalisation is \emph{time-consuming}, \emph{error-prone}, and requires experts in both the domain and logic
+\end{itemize}
+\end{block}
+
 \begin{block}{Sources of normative text}
 \begin{itemize}
     \item Official regulations (e.g., GDPR, MiFID II), guidelines, institutional policies
@@ -114,35 +126,9 @@
 
 \begin{block}{Consequence}
 \begin{itemize}
-    \item If every sentence is translated independently into FOL with its own vocabulary,
-          a reasoning engine cannot easily relate different norms and derive meaningful conclusions.
-\end{itemize}
-\end{block}
-
-\end{frame}
-
-%-------------------------------------------------------------------------------
-\begin{frame}{Use Case: DJ4ME and Machine Ethics}
-
-\begin{block}{DJ4ME (Dialogue Jiminy)}
-\begin{itemize}
-    \item Architecture for machine ethics based on persuasion dialogues among stakeholders' avatars
-    \item Needs:
-    \begin{itemize}
-        \item \textbf{Norm mining} from NL corpora
-        \item Explanations of moral decisions in terms of extracted norms
-    \end{itemize}
-\end{itemize}
-\end{block}
-
-\begin{block}{Why uniform FOL matters here}
-\begin{itemize}
-    \item Norms must be represented in a \textbf{shared logical vocabulary}
-    \item Otherwise:
-    \begin{itemize}
-        \item stakeholders talk “past each other” at the symbolic level
-        \item reasoning and explanation across norms become fragile or impossible
-    \end{itemize}
+    \item If each sentence is translated independently into FOL with its own vocabulary,
+          classical reasoners and argumentation frameworks \emph{cannot easily relate} different norms
+          and derive coherent conclusions over the whole corpus.
 \end{itemize}
 \end{block}
 
@@ -154,21 +140,74 @@
 \begin{block}{Recent progress}
 \begin{itemize}
     \item LLM-based methods for NL$\rightarrow$FOL translation
-    \item Benchmarks (e.g., MALLS, FOLIO) and evaluation metrics
-    \item Strong results on \textbf{single-sentence} translation
+    \item Benchmarks (e.g., MALLS\footnote{\url{https://huggingface.co/datasets/yuan-yang/MALLS-v0}}, FOLIO~\cite{DBLP:conf/emnlp/HanS0QRZCPQBSWS24}) and evaluation metrics
+    \item Strong results on \alert{single-sentence} translation
 \end{itemize}
 \end{block}
 
 \begin{block}{Missing piece}
 \begin{itemize}
     \item Existing works focus on isolated sentences
-    \item Predicate naming, constants, and variables are decided \textbf{locally}
+    \item Predicate naming, constants, and variables are decided \alert{locally}
     \item No explicit mechanism for:
     \begin{itemize}
         \item symbol reuse
         \item predicate alignment
         \item theory-level coherence across a corpus
     \end{itemize}
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+%-------------------------------------------------------------------------------
+\begin{frame}{Example NL$\rightarrow$FOL Pairs from MALLS (Nutrition)}
+
+\tiny
+\begin{table}[t]
+\centering
+\begin{tabular}{p{0.46\textwidth} p{0.46\textwidth}}
+\textbf{Natural language} & \textbf{FOL formula}\\[0.2em]
+\hline
+\emph{Drinking tea can aid in digestion, while consuming carbonated beverages may lead to bloating and indigestion.}
+&
+$\forall x \forall y\,\big(
+    \text{DrinkingTea}(x) \land \text{ConsumingCarbonatedBeverages}(y)
+    \rightarrow
+    (\text{AidsDigestion}(x) \land \lnot \text{CausesBloatingOrIndigestion}(x))
+    \land
+    (\lnot \text{AidsDigestion}(y) \land \text{CausesBloatingOrIndigestion}(y))
+\big)$
+\\[0.8em]
+
+\emph{A healthy diet includes fruits, vegetables, and whole grains.}
+&
+$\forall x\,\big(
+    \text{HealthyDiet}(x)
+    \rightarrow
+    (\text{IncludesFruits}(x) \land \text{IncludesVegetables}(x) \land \text{IncludesWholeGrains}(x))
+\big)$
+\\[0.8em]
+
+\emph{People who exercise regularly and maintain a balanced diet are generally healthier.}
+&
+$\forall x\,\big(
+    \text{Person}(x) \land \text{RegularExercise}(x) \land \text{BalancedDiet}(x)
+    \rightarrow
+    \text{GenerallyHealthier}(x)
+\big)$
+\\
+\end{tabular}
+\end{table}
+
+\vspace{0.5em}
+
+\begin{block}{Observation}
+\begin{itemize}
+    \item Each pair is a \textbf{well-formed} NL$\rightarrow$FOL translation.
+    \item Across many such pairs, predicate names are chosen \alert{independently}
+          (\texttt{HealthyDiet}, \texttt{BalancedDiet}, \texttt{GenerallyHealthier}, \ldots).
+    \item NL2UNIFOL aims to turn many such pairs into a theory with a \emph{uniform vocabulary}.
 \end{itemize}
 \end{block}
 
