@@ -223,22 +223,40 @@ $\forall x\,\big(
 \usebackgroundtemplate{}
 
 %-------------------------------------------------------------------------------
-\begin{frame}{High-Level View of NL2UNIFOL}
+\begin{frame}[allowframebreaks]{High-Level View of NL2UNIFOL}
 
-\begin{block}{Definition of “uniform”}
-All formulae in the theory share the same vocabulary, i.e., a common space of predicate and constant names.
-\end{block}
+%\begin{block}{What do we mean by \emph{uniform}?}
+%All formulae in the theory share the same vocabulary, i.e., a common space of predicate and constant names.
+%\end{block}
 
 \begin{block}{Pipeline}
 \begin{enumerate}
-    \item \textbf{Independent translation}:
-          use an LLM to translate each NL sentence into a preliminary FOL formula
-    \item \textbf{Symbol clustering}:
-          identify and safely merge predicate and constant names
-    \item \textbf{Reconciliation}:
-          replace original names with cluster representatives to obtain the final uniform theory
+    % (1)
+    %independent translation of NL sentences into preliminary FOL formulae, (2) parsing of formulae to extract
+    %predicate and constant names, (3) creation of the embedding-based representations of the extracted names, (4)
+    %computation of similarity score matrices for predicates and constants, (5) graph clustering to identify sets of
+    %names to be merged, and (6) generation of the final uniform FOL theory by replacing the names in the preliminary
+    %formulae with the merged ones.
+    \item \textbf{Independent NL$\rightarrow$FOL translation}: each NL sentence is translated into a preliminary FOL formula
+    \item \textbf{Symbol collection}: parse the formulae to extract predicate and constant names
+    \item \textbf{Context-based embeddings}: for each predicate and constant, build a context string describing how it is used in the theory, and feed it into a transformer encoder to obtain a dense embedding
+    \item \textbf{Similarity matrices}: compute semantic and syntactic similarity matrices
+    \item \textbf{Graph clustering}: build graphs where nodes are symbols and edges represent similarity above a threshold, then identify connected components as clusters of symbols to be merged
+    \item \textbf{Reconciliation}: for each cluster, choose a representative name and replace all symbols in the formulae with their representative, yielding a \emph{uniform} FOL theory
 \end{enumerate}
 \end{block}
+
+\framebreak
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{imgs/workflow}
+    \caption{NL2UNIFOL pipeline overview.}
+    \caption{
+        The NL2UNIFOL pipeline consists of six main steps: (1) independent translation, (2) symbol collection, (3) context-based embeddings, (4) similarity matrices, (5) graph clustering, and (6) reconciliation to produce a uniform FOL theory.
+    }
+    \label{fig:nl2unifol-pipeline}
+\end{figure}
 
 \end{frame}
 
@@ -253,13 +271,13 @@ All formulae in the theory share the same vocabulary, i.e., a common space of pr
 
 \begin{block}{LLM-based translation}
 \begin{itemize}
-    \item Use instruction-tuned LLMs (e.g., Qwen 2.5, LLaMA 3, Mistral, Phi 3.1)
+    \item Use instruction-tuned LLMs
     \item Prompt with:
     \begin{itemize}
-        \item explicit FOL grammar and allowed operators
+        \item FOL \emph{grammar} and allowed operators
         \item naming rules for predicates and variables
-        \item no functions, only predicates and (when needed) constants
-        \item few-shot examples (27 pairs from MALLS nutrition)
+        \item output \emph{formatting} instructions
+        \item \emph{few-shot examples}
     \end{itemize}
 \end{itemize}
 \end{block}
@@ -267,7 +285,7 @@ All formulae in the theory share the same vocabulary, i.e., a common space of pr
 \begin{block}{Output}
 \begin{itemize}
     \item One syntactically-checked FOL formula per sentence
-    \item Still \textbf{non-uniform} symbol space
+    \item Still \alert{non-uniform} symbol space
 \end{itemize}
 \end{block}
 
@@ -278,7 +296,7 @@ All formulae in the theory share the same vocabulary, i.e., a common space of pr
 
 \begin{block}{Parsing}
 \begin{itemize}
-    \item Parse each preliminary formula with a CFG (implemented via Lark)
+    \item Parse each preliminary formula with a grammar checker
     \item Extract:
     \begin{itemize}
         \item predicate symbols as pairs $\langle N, A\rangle$ (name and arity)
@@ -290,7 +308,7 @@ All formulae in the theory share the same vocabulary, i.e., a common space of pr
 
 \begin{block}{Logical constraint}
 \begin{itemize}
-    \item Predicates with different arity \textbf{cannot} be merged
+    \item Predicates with different arity \emph{cannot} be merged
     \item Argument positions will be used later to build context-based embeddings
 \end{itemize}
 \end{block}
@@ -301,8 +319,7 @@ All formulae in the theory share the same vocabulary, i.e., a common space of pr
 \begin{frame}{Step 3: Context-Based Embeddings}
 
 \begin{block}{Key idea}
-Symbols should be represented not only by their surface form, but by \textbf{how they are used}
-in the preliminary theory.
+Symbols should be represented not only by their surface form, but by \alert{how they are used} in the corpus.
 \end{block}
 
 \begin{block}{Predicate context}
@@ -313,17 +330,9 @@ in the preliminary theory.
 \end{itemize}
 \end{block}
 
-\begin{block}{Constant context}
-\begin{itemize}
-    \item For a constant $c$, collect predicates and argument positions in which it occurs
-    \item Verbalise as:\\
-    \emph{Constant ‘c’ is used as argument i of predicates ‘P\_1, ..., P\_m’, as argument j of predicates ‘P\_1, ..., P\_n’.}
-\end{itemize}
-\end{block}
-
 \begin{block}{Embeddings}
 \begin{itemize}
-    \item Feed these context strings into a transformer encoder (e.g., all-MiniLM-L6-v2)
+    \item Feed these context strings into a transformer encoder
     \item Obtain dense, L2-normalised semantic vectors for each symbol
 \end{itemize}
 \end{block}
@@ -379,9 +388,9 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 
 \begin{block}{Representative and reconciliation}
 \begin{itemize}
-    \item For each cluster, choose as representative the name with \textbf{most occurrences}
+    \item For each cluster, choose as representative the name with \emph{most occurrences}
     \item Replace all symbols in preliminary formulas with their cluster representative
-    \item Output: a \textbf{uniform} FOL theory
+    \item Output: a \alertgit {uniform} FOL theory
 \end{itemize}
 \end{block}
 
