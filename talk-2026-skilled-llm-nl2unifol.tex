@@ -390,7 +390,7 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 \begin{itemize}
     \item For each cluster, choose as representative the name with \emph{most occurrences}
     \item Replace all symbols in preliminary formulas with their cluster representative
-    \item Output: a \alertgit {uniform} FOL theory
+    \item Output: a \alert{uniform} FOL theory
 \end{itemize}
 \end{block}
 
@@ -411,7 +411,7 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 \begin{block}{MALLS dataset}
 \begin{itemize}
     \item NL–FOL pairs from multiple domains
-    \item We focus on a \textbf{nutrition} subset (food recommendation)
+    \item We focus on a \alert{nutrition} subset
     \item 748 pairs for evaluation, 27 for few-shot prompting
 \end{itemize}
 \end{block}
@@ -425,19 +425,10 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 \end{itemize}
 \end{block}
 
-\begin{block}{Syntactic correctness}
-\begin{itemize}
-    \item Metric: percentage of generated formulas that are valid under our CFG
-    \item Few-shot prompting improves all models
-    \item Qwen 2.5 Instruct (few-shot) gives the best syntactic correctness
-          $\Rightarrow$ used as base for clustering experiments
-\end{itemize}
-\end{block}
-
 \end{frame}
 
 %-------------------------------------------------------------------------------
-\begin{frame}{Hyperparameter Selection for Predicate Clustering}
+\begin{frame}[allowframebreaks]{Hyperparameter Selection for Predicate Clustering}
 
 \begin{block}{Hyperparameters}
 \begin{itemize}
@@ -455,7 +446,7 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 
 \begin{block}{Selection criterion}
 \begin{itemize}
-    \item Want many non-trivial clusters \textbf{without} over-merging everything
+    \item Want many non-trivial clusters \emph{without} over-merging everything
     \item Define a score $S(\alpha_p, \tau_p)$ that:
     \begin{itemize}
         \item rewards the number of non-trivial clusters
@@ -464,6 +455,19 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
     \end{itemize}
 \end{itemize}
 \end{block}
+
+\framebreak
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{imgs/predicate_merging_plot}
+    \caption{
+        Predicate clustering behaviour varying $\alpha_p$ (semantic vs syntactic weight) and $\tau_p$ (similarity threshold).
+        The heatmap shows the score $S(\alpha_p, \tau_p)$, with brighter colors indicating better configurations.
+        The best configuration is $\alpha_p^\star = 0.1$, $\tau_p^\star = 0.9$.
+    }
+    \label{fig:merging}
+\end{figure}
 
 \end{frame}
 
