@@ -23,6 +23,12 @@
     for Logic, Learning, Ethical Decisions, and LLMs (SKILLED-LLMs 2026)\\
     July 18th, 2026, Lisbon, Portugal
 }
+\ack{
+    This work was partially supported by the Luxembourg National Research Fund (FNR)\\
+    through the project ``A DJ for Machine Ethics: the Dialogue Jiminy'' (O24/18989918/DJ4ME).
+}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \AtBeginSection[]
@@ -406,7 +412,7 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 \usebackgroundtemplate{}
 
 %-------------------------------------------------------------------------------
-\begin{frame}{Dataset and NL$\rightarrow$FOL Baseline}
+\begin{frame}[allowframebreaks]{Dataset and NL$\rightarrow$FOL Baseline}
 
 \begin{block}{MALLS dataset}
 \begin{itemize}
@@ -424,6 +430,17 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
     \item Phi 3.1 Instruct (7B)
 \end{itemize}
 \end{block}
+
+    \framebreak
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{imgs/syntax_translation_performance}
+    \caption{
+        Syntactic correctness of the generated FOL formulae across different LLM families and prompting strategies.
+    }
+    \label{fig:syntax_translation_performance}
+    \end{figure}
 
 \end{frame}
 
@@ -460,7 +477,7 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{imgs/predicate_merging_plot}
+    \includegraphics[width=0.9\textwidth]{imgs/predicate_merging_plot}
     \caption{
         Predicate clustering behaviour varying $\alpha_p$ (semantic vs syntactic weight) and $\tau_p$ (similarity threshold).
         The heatmap shows the score $S(\alpha_p, \tau_p)$, with brighter colors indicating better configurations.
@@ -472,7 +489,7 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 \end{frame}
 
 %-------------------------------------------------------------------------------
-\begin{frame}{Predicate Clustering: Quantitative Results}
+\begin{frame}[allowframebreaks]{Predicate Clustering: Quantitative Results}
 
 \begin{block}{Best configuration}
 \begin{itemize}
@@ -483,9 +500,9 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 
 \begin{block}{Vocabulary reduction}
 \begin{itemize}
-    \item 1170 unique predicates in the generated formulas
-    \item After merging: 863 unique predicates
-    \item $\Rightarrow$ about \textbf{26.2\%} reduction
+    \item \alert{1170} unique predicates in the generated formulas
+    \item After merging: \alert{863} unique predicates
+    \item $\Rightarrow$ about \alert{26.2\%} reduction
 \end{itemize}
 \end{block}
 
@@ -496,10 +513,25 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
 \end{itemize}
 \end{block}
 
+    \framebreak
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.9\textwidth]{imgs/predicate_similarity_graph_a1_t900}
+        \caption{
+            Non-trivial predicate clusters obtained for $\alpha_p = 0.1$ and $\tau_p = 0.9$.
+            %
+            Bubbles represent the clusters, with size proportional to the number of predicates in the cluster.
+            %
+            The representative names of big clusters are reported as labels inside the bubbles.
+        }
+        \label{fig:translation_results}
+    \end{figure}
+
 \end{frame}
 
 %-------------------------------------------------------------------------------
-\begin{frame}{Error Taxonomy for Predicate Merges}
+\begin{frame}[allowframebreaks]{Error Taxonomy for Predicate Merges}
 
 \begin{block}{Relation-level taxonomy}
 Each mapping (\emph{predicate} $\rightarrow$ \emph{representative}) is classified as:
@@ -522,6 +554,29 @@ Each mapping (\emph{predicate} $\rightarrow$ \emph{representative}) is classifie
 \end{itemize}
 \end{block}
 
+    \allowbreak
+
+\begin{table}[t]
+\centering
+\begin{tabular}{|l|ccc|cc|}
+\toprule
+Category & Evaluator 1 & Evaluator 2 & Evaluator 3 & Majority & ChatGPT \\
+\midrule
+OK & 144 & 141 & 133 & 141 & 177 \\
+Egen & 46 & 48 & 55 & 46 & 33 \\
+Espe & 20 & 24 & 21 & 22 & 5 \\
+Ecomp & 20 & 21 & 24 & 21 & 29 \\
+Ecat & 38 & 31 & 22 & 32 & 25 \\
+Esem & 33 & 37 & 18 & 39 & 31 \\
+Epol & 6 & 5 & 3 & 6 & 5 \\
+Ehall & 0 & 0 & 31 & 0 & 2 \\
+\bottomrule
+\end{tabular}
+\caption{Distribution of error categories across annotators, majority voting (with severity-based tie-breaking), and GPT predictions.}
+\label{tab:error_analysis}
+\end{table}
+
+
 \end{frame}
 
 %-------------------------------------------------------------------------------
@@ -529,16 +584,16 @@ Each mapping (\emph{predicate} $\rightarrow$ \emph{representative}) is classifie
 
 \begin{block}{Overall picture (majority vote)}
 \begin{itemize}
-    \item Around \textbf{46\%} of mappings are \textbf{OK}
-    \item Most common error: \textbf{over-generalisation} (Egen)
+    \item Around \alert{46\%} of mappings are \textbf{OK}
+    \item Most common error: \alert{over-generalisation} (\textbf{Egen})
     \item Many errors are relatively mild:
     \begin{itemize}
-        \item Egen, Espe, Ecomp, Ehall can be acceptable depending on the required level of abstraction
+        \item \textbf{Egen}, \textbf{Espe}, \textbf{Ecomp}, \textbf{Ehall} can be acceptable depending on the required level of abstraction
     \end{itemize}
     \item More severe errors:
     \begin{itemize}
-        \item Esem, Ecat, Epol account for about a quarter of the mappings
-        \item Polarity inversions (Epol) are rare (around 1–2\%)
+        \item \textbf{Esem}, \textbf{Ecat}, \textbf{Epol} account for about a quarter of the mappings
+        \item Polarity inversions (\textbf{Epol}) are rare (around 1–2\%)
     \end{itemize}
 \end{itemize}
 \end{block}
@@ -546,7 +601,7 @@ Each mapping (\emph{predicate} $\rightarrow$ \emph{representative}) is classifie
 \begin{block}{Takeaway}
 \begin{itemize}
     \item NL2UNIFOL can achieve substantial vocabulary unification
-    \item But symbol clustering must be treated as a \textbf{noisy step},
+    \item But symbol clustering must be treated as a \emph{noisy step},
           with error types that depend on the application’s tolerance
 \end{itemize}
 \end{block}
@@ -567,8 +622,8 @@ Each mapping (\emph{predicate} $\rightarrow$ \emph{representative}) is classifie
 
 \begin{block}{Strengths}
 \begin{itemize}
-    \item End-to-end pipeline from NL sentences to a \textbf{uniform} FOL theory
-    \item Embedding-based symbol representations that use \textbf{logical context of use}
+    \item End-to-end pipeline from NL sentences to a \emph{uniform} FOL theory
+    \item Embedding-based symbol representations that use \emph{logical context of use}
     \item Combination of:
     \begin{itemize}
         \item semantic similarity
@@ -605,36 +660,15 @@ Each mapping (\emph{predicate} $\rightarrow$ \emph{representative}) is classifie
     \begin{itemize}
         \item legal corpora and regulatory text
         \item medical guidelines and clinical protocols
-        \item richer ethical domains in DJ4ME
+        \item richer ethical domains
     \end{itemize}
-    \item Extend to other logics (e.g., modal/deontic logics) for normative reasoning
+    \item Extend to other logics (e.g., \alert{modal/deontic logics}) for normative reasoning
 \end{itemize}
 \end{block}
 
 \end{frame}
 
 } % end discussion
-
-%===============================================================================
-\begin{frame}{Conclusions}
-
-\begin{block}{In a nutshell}
-\begin{itemize}
-    \item We introduce NL2UNIFOL, targeting \textbf{uniform FOL theories} from NL corpora
-    \item The core is a context-aware symbol clustering mechanism combining semantic and syntactic information under logical constraints
-    \item Experiments on MALLS (nutrition domain) show:
-    \begin{itemize}
-        \item substantial vocabulary reduction
-        \item a mix of correct and noisy merges, with an explicit error taxonomy
-    \end{itemize}
-\end{itemize}
-\end{block}
-
-\vfill
-\centering\Large Thank you!\\
-\normalsize Questions?
-
-\end{frame}
 
 %===============================================================================
 \frame{\titlepage}
