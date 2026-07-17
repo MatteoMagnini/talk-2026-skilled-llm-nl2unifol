@@ -113,7 +113,7 @@
     \item For automated decision-making we need them in a \alert{logical formalism}:
     \begin{itemize}
         \item classical logical reasoners (e.g., first-order theorem provers)
-        \item argumentation frameworks and other AI reasoning systems
+        \item argumentation frameworks and other AI reasoning systems~\cite{DBLP:conf/aies/LiaoST19,DBLP:journals/jair/LiaoPST23}
     \end{itemize}
     \item Manual formalisation is \emph{time-consuming}, \emph{error-prone}, and requires experts in both the domain and logic
 \end{itemize}
@@ -336,7 +336,7 @@ Symbols should be represented not only by their surface form, but by \alert{how 
 \begin{itemize}
     \item For a predicate $N$ of arity $A$, collect all terms seen in each argument position
     \item Verbalise into a short NL description of the form:\\
-    \emph{Predicate ‘N’ relates something like ‘T\_{1,1}, ..., T\_{1,n\_1}’ to ... ‘T\_{A,1}, ..., T\_{A,n\_A}’.}
+    \emph{Predicate `N' relates something like `$T_{1,1}$, ..., $T_{1,n_1}$' to ... `$T_{A,1}$, ..., $T_{A,n_A}$'.}
 \end{itemize}
 \end{block}
 
@@ -580,6 +580,72 @@ Ehall & 0 & 0 & 31 & 0 & 2 \\
 \label{tab:error_analysis}
 \end{table}
 
+    \allowbreak
+
+\tiny
+\begin{table}[t]
+\centering
+\begin{tabular}{p{0.10\textwidth} p{0.33\textwidth} p{0.47\textwidth}}
+\textbf{Label} & \textbf{Example mapping} & \textbf{Intuition}\\[0.2em]
+\hline
+\multirow{2}{*}{OK}
+& \texttt{BalancedMixOfProteins} &
+\multirow{2}{0.47\textwidth}{Preserves the essential meaning while abstracting away surface variation; a correct semantic generalisation.}
+\\
+& \texttt{BalanceOfProteins} &
+\\[0.4em]
+
+\multirow{2}{*}{Egen}
+& \texttt{ContainsVitaminC} &
+\multirow{2}{0.47\textwidth}{Representative is compatible but too abstract; loses the distinction between a specific vitamin and vitamins in general.}
+\\
+& \texttt{ContainsVitamins} &
+\\[0.4em]
+
+\multirow{2}{*}{Espe}
+& \texttt{ContainsProtein} &
+\multirow{2}{0.47\textwidth}{Adds constraints not implied by the original predicate; the mapping becomes overly specific.}
+\\
+& \texttt{IncludesLeanProteins} &
+\\[0.4em]
+
+\multirow{2}{*}{Esem}
+& \texttt{BalanceOfFruits} &
+\multirow{2}{0.47\textwidth}{Lexically similar but conceptually different; refers to different nutritional concepts, so the merge is inconsistent.}
+\\
+& \texttt{BalanceOfFats} &
+\\[0.4em]
+
+\multirow{2}{*}{Ecomp}
+& \texttt{ProvidesEssentialVitaminsAndMinerals} &
+\multirow{2}{0.47\textwidth}{Only part of the meaning is preserved; minerals are dropped, reducing semantic coverage.}
+\\
+& \texttt{ContainsVitamins} &
+\\[0.4em]
+
+\multirow{2}{*}{Epol}
+& \texttt{HealthyFats} &
+\multirow{2}{0.47\textwidth}{Reverses the evaluative meaning; creates a polarity contradiction.}
+\\
+& \texttt{Unhealthy} &
+\\[0.4em]
+
+\multirow{2}{*}{Ecat}
+& \texttt{Healthy} &
+\multirow{2}{0.47\textwidth}{Changes ontological type (property vs. entity class); structural mismatch beyond lexical variation.}
+\\
+& \texttt{HealthyDiet} &
+\\[0.4em]
+
+\multirow{2}{*}{Ehall}
+& \texttt{MadeFromLeaves} &
+\multirow{2}{0.47\textwidth}{Representative is not a plausible generalisation; introduces an unrelated concept (spurious abstraction).}
+\\
+& \texttt{MadeFromButter} &
+\\
+\end{tabular}
+\end{table}
+
 
 \end{frame}
 
@@ -606,7 +672,7 @@ Ehall & 0 & 0 & 31 & 0 & 2 \\
 \begin{itemize}
     \item NL2UNIFOL can achieve substantial vocabulary unification
     \item But symbol clustering must be treated as a \emph{noisy step},
-          with error types that depend on the application’s tolerance
+          with error types that depend on the application's tolerance
 \end{itemize}
 \end{block}
 
