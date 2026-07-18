@@ -483,9 +483,17 @@ M_c = (1 - \alpha_c)\, M_{c,\text{sem}} + \alpha_c\, M_{c,\text{syn}}
     \centering
     \includegraphics[width=0.9\textwidth]{imgs/predicate_merging_plot}
     \caption{
-        Predicate clustering behaviour varying $\alpha_p$ (semantic vs syntactic weight) and $\tau_p$ (similarity threshold).
-        The heatmap shows the score $S(\alpha_p, \tau_p)$, with brighter colors indicating better configurations.
-        The best configuration is $\alpha_p^\star = 0.1$, $\tau_p^\star = 0.9$.
+        Predicate clustering behaviour varying $\alpha_p$ and $\tau_p$ hyperparameters.
+        %
+        Blue lines represent the overall number of merged predicates.
+        %
+        Orange lines represent the number of predicate clusters with more than one predicate (i.e., actual merges).
+        %
+        The darker the lines, the lowest the value of $\alpha_p$.
+        %
+        Values of $\alpha_p$ range from $0$ (purely semantic similarity) to $1$ (purely syntactic similarity) with step $0.1$.
+        %
+        Values of $\tau_p$ range from $0.525$ to $1$ with step $0.025$.
     }
     \label{fig:merging}
 \end{figure}
